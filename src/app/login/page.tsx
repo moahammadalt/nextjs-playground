@@ -1,26 +1,44 @@
-import { createClient } from '@/utils/supabase/server'
+'use client';
+
+import { useRouter } from 'next/navigation';
 import { login, signup } from './actions';
 
-const supabase = await createClient()
+export default function LoginPage() {
+  const router = useRouter();
 
-export default async function LoginPage() {
-  console.time('getUser LoginPage')
-  const { data: { user } } = await supabase.auth.getUser()
-  console.timeEnd('getUser LoginPage')
+  async function handleLogin(formData: FormData) {
+    const result = await login(formData);
+    if (result.success) {
+      router.push('/');
+      router.refresh();
+    } else if (result.error) {
+      // You might want to add state to show this error in the UI
+      console.error(result.error);
+    }
+  }
+
+  async function handleSignup(formData: FormData) {
+    const result = await signup(formData);
+    if (result.success) {
+      router.push('/');
+      router.refresh();
+    } else if (result.error) {
+      // You might want to add state to show this error in the UI
+      console.error(result.error);
+    }
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
       <form style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        {user ? <p>Logged in as {user.email} id {user.id}</p> : <p>Not logged in</p>}
-
         <label htmlFor="email">Email:</label>
         <input id="email" name="email" type="email" required />
         <label htmlFor="password">Password:</label>
         <input id="password" name="password" type="password" required />
         <br />
-        <button formAction={login}>Log in</button>
+        <button type="submit" formAction={handleLogin}>Log in</button>
         <br />
-        <button formAction={signup}>Sign up</button>
+        <button type="submit" formAction={handleSignup}>Sign up</button>
       </form>
     </div>
   );

@@ -2,32 +2,25 @@
 
 import { supabase } from '@/lib/supabaseClient';
 import { useChat } from 'ai/react';
-import { revalidatePath } from 'next/cache';
 import { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
 
 // Define the server action
-async function signOut() {
 
-  await supabase.auth.signOut();
-  revalidatePath('/');
-}
 
 export default function Home() {
   console.time('getUser Home');
   const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
 
-  const { messages, input, handleInputChange, handleSubmit } = useChat();
+  const { messages, input, handleInputChange, handleSubmit, stop, isLoading } = useChat();
 
   useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-    };
-
-    getUser();
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
 
     // Set up realtime subscription for auth changes
     const {
@@ -39,12 +32,20 @@ export default function Home() {
     return () => subscription.unsubscribe();
   }, []);
 
+  async function signOut() {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+      router.push('/');
+      router.refresh(); // This will refresh the page data
+    }
+  }
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       Hello logged in user {user?.email} id {user?.id}
       <div className="grid grid-rows-[20px_1fr_auto] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
         {/* Chat messages */}
-        <div className="w-full max-w-2xl h-[600px] overflow-y-auto">
+        <div className="w-full text-gray-900">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -54,6 +55,15 @@ export default function Home() {
             </div>
           ))}
         </div>
+
+        {isLoading && (
+          <div>
+            loading...
+            <button type="button" onClick={() => stop()}>
+              Stop
+            </button>
+          </div>
+        )}
 
         {/* Chat input form */}
         <form onSubmit={handleSubmit} className="w-full max-w-2xl">
