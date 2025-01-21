@@ -1,5 +1,5 @@
-import { pgTable, text, timestamp, uuid, json, primaryKey } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { pgTable, text, timestamp, uuid, json, primaryKey, pgPolicy } from 'drizzle-orm/pg-core';
+import { relations, sql } from 'drizzle-orm';
 import { authUsers } from 'drizzle-orm/supabase';
 
 // 1. User Table
@@ -20,7 +20,6 @@ export const usersRelations = relations(users, ({ many }) => ({
   messages: many(messages),
   feedback: many(feedback),
 }));
-
 
 // 2. Modality Table
 export const modalities = pgTable('modalities', {
@@ -70,17 +69,66 @@ export const modelsRelations = relations(models, ({ one, many }) => ({
 }));
 
 // 4. Conversation Table
-export const conversations = pgTable('conversations', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => users.id),
-  title: text('title').notNull(),
-  conversationMode: text('conversation_mode', { enum: ['side-by-side', 'battle', 'chat'] }).notNull(),
-  lastMessageId: uuid('last_message_id'), // Optional reference to last message
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+export const conversations = pgTable(
+  'conversations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    title: text('title').notNull(),
+    conversationMode: text('conversation_mode', { enum: ['side-by-side', 'battle', 'chat'] }).notNull(),
+    lastMessageId: uuid('last_message_id'), // Optional reference to last message
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    policies: [
+      pgPolicy('users_select_own_conversations', {
+        for: 'select',
+        using: sql`EXISTS (
+          SELECT 1 FROM users 
+          WHERE users.id = ${table.userId} 
+          AND users.user_id = auth.uid()::uuid
+        )`,
+      }),
+      pgPolicy('users_insert_own_conversations', {
+        for: 'insert',
+        using: sql`EXISTS (
+          SELECT 1 FROM users 
+          WHERE users.id = ${table.userId} 
+          AND users.user_id = auth.uid()::uuid
+        )`,
+        withCheck: sql`EXISTS (
+          SELECT 1 FROM users 
+          WHERE users.id = ${table.userId} 
+          AND users.user_id = auth.uid()::uuid
+        )`,
+      }),
+      pgPolicy('users_delete_own_conversations', {
+        for: 'delete',
+        using: sql`EXISTS (
+          SELECT 1 FROM users 
+          WHERE users.id = ${table.userId} 
+          AND users.user_id = auth.uid()::uuid
+        )`,
+      }),
+      pgPolicy('users_update_own_conversations', {
+        for: 'update',
+        using: sql`EXISTS (
+          SELECT 1 FROM users 
+          WHERE users.id = ${table.userId} 
+          AND users.user_id = auth.uid()::uuid
+        )`,
+        withCheck: sql`EXISTS (
+          SELECT 1 FROM users 
+          WHERE users.id = ${table.userId} 
+          AND users.user_id = auth.uid()::uuid
+        )`,
+      }),
+    ],
+  })
+).enableRLS();
 
 // Junction table for conversations and models (many-to-many)
 export const conversationModels = pgTable(

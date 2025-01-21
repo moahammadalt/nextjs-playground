@@ -1,0 +1,1 @@
+ALTER TABLE "conversations" ENABLE ROW LEVEL SECURITY;

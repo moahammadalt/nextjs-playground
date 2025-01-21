@@ -35,13 +35,13 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: DO NOT REMOVE auth.getUser()
 
-  console.time('getUserSession');
+  //console.time('getUserSession');
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  console.timeEnd('getUserSession');
+  //console.timeEnd('getUserSession');
 
-  console.log('user middleware: ', user);
+  //console.log('user middleware: ', user);
 
   if (
     !user &&

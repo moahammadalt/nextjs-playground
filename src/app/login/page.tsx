@@ -24,7 +24,7 @@ export default function LoginPage() {
       router.refresh();
     } else if (result.error) {
       // You might want to add state to show this error in the UI
-      console.error(result.error);
+      console.error('error handleSignup', result.error);
     }
   }
 
@@ -32,9 +32,9 @@ export default function LoginPage() {
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
       <form style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <label htmlFor="email">Email:</label>
-        <input id="email" name="email" type="email" required />
+        <input className="text-gray-900" id="email" name="email" type="email" required />
         <label htmlFor="password">Password:</label>
-        <input id="password" name="password" type="password" required />
+        <input className="text-gray-900" id="password" name="password" type="password" required />
         <br />
         <button type="submit" formAction={handleLogin}>Log in</button>
         <br />

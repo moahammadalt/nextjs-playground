@@ -7,16 +7,19 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:sss": "drizzle-kit generate --custom --name=user-creation-trigger --config=src/db/drizzle.config.ts",
     "db:generate": "drizzle-kit generate --name=$npm_config_name --config=src/db/drizzle.config.ts",
+    "db:generate-manual": "drizzle-kit generate --custom --name=$npm_config_name --config=src/db/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config=src/db/drizzle.config.ts",
+    "db:seed": "tsx src/db/seed.ts",
     "db:studio": "drizzle-kit studio --config=src/db/drizzle.config.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.20",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.14",
     "@types/pg": "^8.11.10",
+    "@types/uuid": "^10.0.0",
     "ai": "^4.0.39",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.38.4",
@@ -25,7 +28,8 @@
     "postgres": "^3.4.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-markdown": "^9.0.3"
+    "react-markdown": "^9.0.3",
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
