@@ -11,7 +11,8 @@
     "db:generate-manual": "drizzle-kit generate --custom --name=$npm_config_name --config=src/db/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config=src/db/drizzle.config.ts",
     "db:seed": "tsx src/db/seed.ts",
-    "db:studio": "drizzle-kit studio --config=src/db/drizzle.config.ts"
+    "db:studio": "drizzle-kit studio --config=src/db/drizzle.config.ts",
+    "test": "vitest"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.20",
@@ -29,7 +30,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^9.0.3",
-    "uuid": "^11.0.5"
+    "uuid": "^11.0.5",
+    "vitest": "^3.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
